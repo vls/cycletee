@@ -1,7 +1,8 @@
 `cycletee` is inspired by `tee`. It reads every line from `stdin`, and cycle print line to output file
 
 
-* Example:
+Example
+=============
 
     seq 10 | ./tee 1.txt 2.txt 3.txt
 
