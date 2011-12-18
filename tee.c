@@ -28,7 +28,7 @@
 #include "xfreopen.h"
 
 /* The official name of this program (e.g., no `g' prefix).  */
-#define PROGRAM_NAME "tee"
+#define PROGRAM_NAME "cycletee"
 
 #define AUTHORS \
   proper_name ("Mike Parker"), \
@@ -146,6 +146,9 @@ tee_files (int nfiles, const char **files)
      ? (append ? "ab" : "wb")
      : (append ? "a" : "w"));
 
+    bool flag_break = false;
+    bool flag_continue = false;
+    int backup_i;
   descriptors = xnmalloc (nfiles + 1, sizeof *descriptors);
 
   /* Move all the names `up' one in the argv array to make room for
@@ -182,15 +185,32 @@ tee_files (int nfiles, const char **files)
 
   while (1)
     {
-      bytes_read = read (0, buffer, sizeof buffer);
-      if (bytes_read < 0 && errno == EINTR)
-        continue;
-      if (bytes_read <= 0)
-        break;
+        if(!flag_continue) {
+            backup_i = 1;
+        }
 
       /* Write to all NFILES + 1 descriptors.
          Standard output is the first one.  */
-      for (i = 0; i <= nfiles; i++)
+      for (i = backup_i; i <= nfiles; i++) {
+
+        int BUFLEN = (int) sizeof buffer;
+        buffer[0] = '\0';
+        fgets(buffer, BUFLEN, stdin);
+        bytes_read = strlen(buffer);
+        
+        
+          if (bytes_read < 0 && errno == EINTR)
+          {
+              flag_continue = true;
+              backup_i = i;
+              break;
+          }
+          if (bytes_read <= 0) {
+              flag_break = true;
+              break;
+          }
+          
+
         if (descriptors[i]
             && fwrite (buffer, bytes_read, 1, descriptors[i]) != 1)
           {
@@ -198,6 +218,14 @@ tee_files (int nfiles, const char **files)
             descriptors[i] = NULL;
             ok = false;
           }
+      }
+
+      if(flag_break) {
+          break;
+      }
+      if(flag_continue) {
+          continue;
+      }
     }
 
   if (bytes_read == -1)
