@@ -209,6 +209,15 @@ tee_files (int nfiles, const char **files)
               flag_break = true;
               break;
           }
+
+        if (descriptors[0] 
+                && fwrite(buffer, bytes_read, 1, descriptors[0]) != 1)
+                {
+                    error (0, errno, "%s", files[0]);
+                    descriptors[0] = NULL;
+                    ok = false;
+                }
+
           
 
         if (descriptors[i]
