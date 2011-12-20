@@ -4,7 +4,7 @@
 Example
 =============
 
-    seq 10 | ./tee 1.txt 2.txt 3.txt
+    seq 10 | cycletee 1.txt 2.txt 3.txt
 
     cat 1.txt // prints 1, 4, 7, 10
 
@@ -22,3 +22,5 @@ Compilation
 * run `configure` in `coreutils-x.xx` directory
 
 * run `make` in `coreutils-x.xx/src` directory
+
+* `cp tee /usr/local/bin/cycletee`
