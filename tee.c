@@ -151,6 +151,7 @@ tee_files (int nfiles, const char **files)
     bool flag_break = false;
     bool flag_continue = false;
     int backup_i;
+    char* ptr;
   descriptors = xnmalloc (nfiles + 1, sizeof *descriptors);
 
   /* Move all the names `up' one in the argv array to make room for
@@ -195,9 +196,17 @@ tee_files (int nfiles, const char **files)
          Standard output is the first one.  */
       for (i = backup_i; i <= nfiles; i++) {
 
-        int BUFLEN = (int) sizeof buffer;
+read:
         buffer[0] = '\0';
-        fgets(buffer, BUFLEN, stdin);
+        ptr = fgets(buffer, (int) sizeof buffer, stdin);
+        if(NULL == ptr) {
+            if(ferror(stdin)) {
+                error (0, errno, "%s", _("standard input"));
+                ok = false;
+            }
+            flag_break = true;
+            break;
+        }
         bytes_read = strlen(buffer);
         
         
@@ -229,6 +238,10 @@ tee_files (int nfiles, const char **files)
             descriptors[i] = NULL;
             ok = false;
           }
+
+        if(!strchr(buffer, '\n')) {
+            goto read;
+        }
       }
 
       if(flag_break) {
