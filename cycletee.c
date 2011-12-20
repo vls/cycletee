@@ -232,7 +232,6 @@ read:
                     break;
                 }
                 bytes_read = strlen(buffer);
-                fprintf(stderr, "--- %p|%d|%s", ptr, bytes_read, buffer);
 
 
                 if (bytes_read < 0 && errno == EINTR)
