@@ -12,3 +12,13 @@ Example
 
     cat 3.txt // prints 3, 6, 9
 
+Compilation
+=============
+
+* Download GNU coreutils >= 8.14 and extract
+
+* link `cycletee.c` to `coreutils-x.xx/src` directory
+
+* run `configure` in `coreutils-x.xx` directory
+
+* run `make` in `coreutils-x.xx/src` directory
