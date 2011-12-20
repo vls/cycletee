@@ -1,4 +1,4 @@
-/* tee - read from standard input and write to standard output and files.
+/* cycletee - read from standard input and write to standard output, and write to files circularly.
    Copyright (C) 1985, 1990-2006, 2008-2011 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* Mike Parker, Richard M. Stallman, and David MacKenzie */
+/* Mike Parker, Richard M. Stallman, and David MacKenzie
+ * Modified to cycletee by Liang Zhaohao */
 
 #include <config.h>
 #include <sys/types.h>
@@ -33,7 +34,8 @@
 #define AUTHORS \
   proper_name ("Mike Parker"), \
   proper_name ("Richard M. Stallman"), \
-  proper_name ("David MacKenzie")
+  proper_name ("David MacKenzie"), \
+  proper_name ("Liang Zhaohao (liangvls@gmail.com)")
 
 static bool tee_files (int nfiles, const char **files);
 
