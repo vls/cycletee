@@ -140,7 +140,7 @@ tee_files (int nfiles, const char **files)
 {
     FILE **descriptors;
     char buffer[BUFSIZ];
-    ssize_t bytes_read;
+    size_t bytes_read;
     int i;
     bool ok = true;
     char const *mode_string =
