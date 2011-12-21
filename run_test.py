@@ -4,7 +4,7 @@ import unittest
 import os
 
 def file_get_contents(fname):
-    return open(fname, 'r').readlines()
+    return (line.rstrip(os.linesep) for line in open(fname, 'r').readlines())
 
 class TestCycletee(unittest.TestCase):
     def test_10line(self):
@@ -39,6 +39,20 @@ class TestCycletee(unittest.TestCase):
         ae = self.assertEqual
         for i, line in enumerate(lines):
             ae(line, expect_arr[i])
+
+    def test_binary(self):
+        s = 'abc' + ''.join((chr(i) for i in xrange(256)))
+        with open('input.txt', 'w') as wf:
+            wf.write(s)
+
+        os.system("cat input.txt | bin/cycletee 1.txt > /dev/null")
+        lines = file_get_contents("1.txt")
+        expect_arr = s.split('\n')
+        ae = self.assertEqual
+        for i, line in enumerate(lines):
+            ae(line, expect_arr[i])
+
+
 
 
     def tearDown(self):

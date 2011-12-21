@@ -152,6 +152,8 @@ tee_files (int nfiles, const char **files)
     bool flag_continue = false;
     int backup_i;
     char* ptr;
+    bool has_entire_line = false;
+
     descriptors = xnmalloc (nfiles + 1, sizeof *descriptors);
 
     /* Move all the names `up' one in the argv array to make room for
@@ -221,7 +223,9 @@ tee_files (int nfiles, const char **files)
             for (i = backup_i; i <= nfiles; i++) {
 
 read:
-                buffer[0] = '\0';
+                memset(buffer, '\0', sizeof buffer);
+                has_entire_line = false;
+
                 ptr = fgets(buffer, (int) sizeof buffer, stdin);
                 if(NULL == ptr) {
                     if(ferror(stdin)) {
@@ -231,7 +235,14 @@ read:
                     flag_break = true;
                     break;
                 }
-                bytes_read = strlen(buffer);
+                if(ptr = (char*)memchr(buffer, '\n', sizeof buffer)) {
+                    bytes_read = (size_t) (ptr + 1 - buffer);
+                    has_entire_line = true;
+                }
+                else {
+                    bytes_read = strlen(buffer);
+                    has_entire_line = false;
+                }
 
 
                 if (bytes_read < 0 && errno == EINTR)
@@ -263,7 +274,7 @@ read:
                     ok = false;
                 }
 
-                if(!strchr(buffer, '\n')) {
+                if(!has_entire_line) {
                     goto read;
                 }
             }
