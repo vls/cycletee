@@ -28,6 +28,11 @@
 #include "stdio--.h"
 #include "xfreopen.h"
 
+#define min(a,b) \
+       ({ __typeof__ (a) _a = (a); \
+           __typeof__ (b) _b = (b); \
+         _a < _b ? _a : _b; })
+
 /* The official name of this program (e.g., no `g' prefix).  */
 #define PROGRAM_NAME "cycletee"
 
@@ -160,6 +165,9 @@ tee_files (int nfiles, const char **files)
     bool flag_continue = false;
     int backup_i;
     char* ptr;
+    char* next_ptr;
+    size_t len;
+    size_t remain;
     bool has_entire_line = false;
 
     descriptors = xnmalloc (nfiles + 1, sizeof *descriptors);
@@ -221,54 +229,42 @@ tee_files (int nfiles, const char **files)
         }
     }
     else {
+        i = 1;
 
         while (1)
         {
-            if(!flag_continue) {
-                backup_i = 1;
-            }
 
             /* Write to all NFILES + 1 descriptors.
                Standard output is the first one.  */
-            for (i = backup_i; i <= nfiles; i++) {
+            has_entire_line = true;
 
-read:
-                memset(buffer, '\0', sizeof buffer);
-                has_entire_line = false;
+            bytes_read = read(0, buffer, sizeof buffer);
 
-                ptr = fgets(buffer, (int) sizeof buffer, stdin);
-                if(NULL == ptr) {
-                    if(ferror(stdin)) {
-                        error (0, errno, "%s", _("standard input"));
-                        ok = false;
-                    }
-                    flag_break = true;
-                    break;
-                }
-                if(ptr = (char*)memchr(buffer, '\n', sizeof buffer)) {
-                    bytes_read = (size_t) (ptr + 1 - buffer);
+            if (bytes_read < 0 && errno == EINTR)
+            {
+                continue;
+            }
+            if (bytes_read <= 0) {
+                break;
+            }
+
+            remain = bytes_read;
+            ptr = buffer;
+            do {
+
+                if(next_ptr = (char*)memchr(ptr, '\n', min(remain, (sizeof buffer) - (ptr - buffer))) ) {
+                    next_ptr++;
+                    len = (size_t) (next_ptr - ptr);
                     has_entire_line = true;
                 }
                 else {
-                    bytes_read = strlen(buffer);
+                    len = min(remain, (sizeof buffer) - (ptr - buffer));
                     has_entire_line = false;
-                }
-
-
-                if (bytes_read < 0 && errno == EINTR)
-                {
-                    flag_continue = true;
-                    backup_i = i;
-                    break;
-                }
-                if (bytes_read <= 0) {
-                    flag_break = true;
-                    break;
                 }
 
                 if(!no_stdout) {
                     if (descriptors[0] 
-                            && fwrite(buffer, bytes_read, 1, descriptors[0]) != 1)
+                            && fwrite(ptr, len, 1, descriptors[0]) != 1)
                     {
                         error (0, errno, "%s", files[0]);
                         descriptors[0] = NULL;
@@ -279,24 +275,23 @@ read:
 
 
                 if (descriptors[i]
-                        && fwrite (buffer, bytes_read, 1, descriptors[i]) != 1)
+                        && fwrite (ptr, len, 1, descriptors[i]) != 1)
                 {
                     error (0, errno, "%s", files[i]);
                     descriptors[i] = NULL;
                     ok = false;
                 }
 
-                if(!has_entire_line) {
-                    goto read;
+                ptr = next_ptr;
+                i++;
+                if(i > nfiles) {
+                    i = 1;
                 }
-            }
+                remain -= len;
 
-            if(flag_break) {
-                break;
-            }
-            if(flag_continue) {
-                continue;
-            }
+            } while(has_entire_line && remain > 0);
+
+
         }
     }
 
