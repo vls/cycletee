@@ -2,7 +2,6 @@
 
 import unittest
 import os
-import subprocess
 from subprocess import Popen, PIPE
 
 def file_get_contents(fname):

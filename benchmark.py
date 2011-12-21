@@ -6,7 +6,7 @@ import os
 def run():
     t0 = time.time()
 
-    os.system('seq 300000 | bin/cycletee > /dev/null')
+    os.system('seq 300000 | bin/cycletee -n')
 
     total = time.time() - t0
     total *= 1000
