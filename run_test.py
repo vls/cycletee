@@ -2,6 +2,8 @@
 
 import unittest
 import os
+import subprocess
+from subprocess import Popen, PIPE
 
 def file_get_contents(fname):
     return (line.rstrip(os.linesep) for line in open(fname, 'r').readlines())
@@ -51,6 +53,14 @@ class TestCycletee(unittest.TestCase):
         ae = self.assertEqual
         for i, line in enumerate(lines):
             ae(line, expect_arr[i])
+
+    def test_nostdout(self):
+
+        p1 = Popen(["echo", "123"], stdout=PIPE)
+        p2 = Popen(["bin/cycletee", "-n"], stdin = p1.stdout, stdout = PIPE, cwd = os.getcwd())
+        output = p2.communicate()[0]
+        ae = self.assertEqual
+        ae(output, '')
 
 
 

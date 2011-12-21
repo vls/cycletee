@@ -45,6 +45,8 @@ static bool append;
 /* If true, ignore interrupts. */
 static bool ignore_interrupts;
 
+static bool no_stdout;
+
 static struct option const long_options[] =
 {
     {"append", no_argument, NULL, 'a'},
@@ -68,6 +70,7 @@ usage (int status)
                     \n\
                     -a, --append              append to the given FILEs, do not overwrite\n\
                     -i, --ignore-interrupts   ignore interrupt signals\n\
+                    -n,                       no output to stdout\n\
                     "), stdout);
         fputs (HELP_OPTION_DESCRIPTION, stdout);
         fputs (VERSION_OPTION_DESCRIPTION, stdout);
@@ -96,8 +99,9 @@ main (int argc, char **argv)
 
     append = false;
     ignore_interrupts = false;
+    no_stdout = false;
 
-    while ((optc = getopt_long (argc, argv, "ai", long_options, NULL)) != -1)
+    while ((optc = getopt_long (argc, argv, "ain", long_options, NULL)) != -1)
     {
         switch (optc)
         {
@@ -107,6 +111,10 @@ main (int argc, char **argv)
 
             case 'i':
                 ignore_interrupts = true;
+                break;
+
+            case 'n':
+                no_stdout = true;
                 break;
 
                 case_GETOPT_HELP_CHAR;
@@ -200,12 +208,14 @@ tee_files (int nfiles, const char **files)
             if (bytes_read <= 0)
                 break;
 
-            if (descriptors[0]
-                    && fwrite (buffer, bytes_read, 1, descriptors[0]) != 1)
-            {
-                error (0, errno, "%s", files[0]);
-                descriptors[0] = NULL;
-                ok = false;
+            if(!no_stdout) {
+                if (descriptors[0]
+                        && fwrite (buffer, bytes_read, 1, descriptors[0]) != 1)
+                {
+                    error (0, errno, "%s", files[0]);
+                    descriptors[0] = NULL;
+                    ok = false;
+                }
             }
 
         }
@@ -256,12 +266,14 @@ read:
                     break;
                 }
 
-                if (descriptors[0] 
-                        && fwrite(buffer, bytes_read, 1, descriptors[0]) != 1)
-                {
-                    error (0, errno, "%s", files[0]);
-                    descriptors[0] = NULL;
-                    ok = false;
+                if(!no_stdout) {
+                    if (descriptors[0] 
+                            && fwrite(buffer, bytes_read, 1, descriptors[0]) != 1)
+                    {
+                        error (0, errno, "%s", files[0]);
+                        descriptors[0] = NULL;
+                        ok = false;
+                    }
                 }
 
 
