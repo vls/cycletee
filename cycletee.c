@@ -33,6 +33,11 @@
            __typeof__ (b) _b = (b); \
          _a < _b ? _a : _b; })
 
+#define eprintf(...) \
+    fprintf(stderr, "Error: ");   \
+    fprintf(stderr, __VA_ARGS__); \
+    fprintf(stderr, "\n"); 
+
 /* The official name of this program (e.g., no `g' prefix).  */
 #define PROGRAM_NAME "cycletee"
 
@@ -272,8 +277,6 @@ tee_files (int nfiles, const char **files)
                     }
                 }
 
-
-
                 if (descriptors[i]
                         && fwrite (ptr, len, 1, descriptors[i]) != 1)
                 {
@@ -283,9 +286,13 @@ tee_files (int nfiles, const char **files)
                 }
 
                 ptr = next_ptr;
-                i++;
-                if(i > nfiles) {
-                    i = 1;
+
+                if(has_entire_line) {
+                    /* Did read an entire line, print next line to next descriptor */
+                    i++;
+                    if(i > nfiles) {
+                        i = 1;
+                    }
                 }
                 remain -= len;
 

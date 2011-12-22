@@ -34,7 +34,7 @@ class TestCycletee(unittest.TestCase):
         with open('input.txt', 'w') as wf:
             wf.write(s)
 
-        os.system("cat input.txt | bin/cycletee 1.txt > /dev/null")
+        os.system("cat input.txt | bin/cycletee 1.txt 2.txt > /dev/null")
         lines = file_get_contents("1.txt")
         expect_arr = [s]
         ae = self.assertEqual
