@@ -31,12 +31,28 @@ class TestCycletee(unittest.TestCase):
 
     def test_large_line(self):
         s = 's' * 16384
+        s2 = 's2' * 16384
         with open('input.txt', 'w') as wf:
             wf.write(s)
+            wf.write('\n')
+            wf.write(s2)
 
-        os.system("cat input.txt | bin/cycletee 1.txt 2.txt > /dev/null")
+        os.system("cat input.txt | bin/cycletee 1.txt 2.txt 3.txt > /dev/null")
+
         lines = file_get_contents("1.txt")
         expect_arr = [s]
+        ae = self.assertEqual
+        for i, line in enumerate(lines):
+            ae(line, expect_arr[i])
+
+        lines = file_get_contents("2.txt")
+        expect_arr = [s2]
+        ae = self.assertEqual
+        for i, line in enumerate(lines):
+            ae(line, expect_arr[i])
+
+        lines = file_get_contents("3.txt")
+        expect_arr = []
         ae = self.assertEqual
         for i, line in enumerate(lines):
             ae(line, expect_arr[i])
